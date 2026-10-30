@@ -25,7 +25,7 @@ A bash script that creates a kill switch for WireGuard VPN on macOS using PF (Pa
 1. Clone this repository or download the `killswitch.sh` script:
 
 ```bash
-git clone https://github.com/Epsilon0xCell/wireguard-killswitch.git
+git clone https://github.com/Epsilon0xCell/WireGuard-Killswitch-Monitor.git
 
 cd wireguard-killswitch
 ```
