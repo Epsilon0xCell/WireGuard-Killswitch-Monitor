@@ -1,11 +1,17 @@
 #!/bin/bash
 
-# Default VPN interface (fallback if detection fails)
+# Default VPN interface (fallback if detection fails). Set the
+# VPN_INTERFACE environment variable to skip detection and use a
+# specific interface instead.
 DEFAULT_VPN_INTERFACE="utun4"
 
-# VPN characteristics
+# VPN characteristics. The listen port can be overridden with the
+# WIREGUARD_PORT environment variable.
 VPN_MTU=1280
-VPN_LISTEN_PORT=51820
+VPN_LISTEN_PORT="${WIREGUARD_PORT:-51820}"
+
+# Seconds to wait between connection checks in the monitor loop
+CHECK_INTERVAL=2
 
 # Function to detect WireGuard interface based on MTU and listen port
 detect_wg_interface() {
@@ -55,16 +61,31 @@ block_all_traffic() {
     echo "VPN is disconnected. Enforcing killswitch."
 }
 
+# Cleanup on termination: flush the PF rules and disable PF, so the
+# machine is not left blocked (or passed) by the last loaded ruleset
+cleanup() {
+    echo "Disabling kill switch..."
+    sudo pfctl -F all 2>/dev/null
+    sudo pfctl -d 2>/dev/null
+    echo "Kill switch disabled. Internet access restored."
+    exit 0
+}
+trap cleanup INT TERM
+
 # Enable the firewall
 sudo pfctl -E
 
-# Detect WireGuard interface
-VPN_INTERFACE=$(detect_wg_interface)
+# Detect WireGuard interface, unless one was set in the environment
 if [ -n "$VPN_INTERFACE" ]; then
-    echo "Detected WireGuard interface: $VPN_INTERFACE"
+    echo "Using VPN interface from environment: $VPN_INTERFACE"
 else
-    VPN_INTERFACE="$DEFAULT_VPN_INTERFACE"
-    echo "No WireGuard interface detected. Using fallback: $VPN_INTERFACE"
+    VPN_INTERFACE=$(detect_wg_interface)
+    if [ -n "$VPN_INTERFACE" ]; then
+        echo "Detected WireGuard interface: $VPN_INTERFACE"
+    else
+        VPN_INTERFACE="$DEFAULT_VPN_INTERFACE"
+        echo "No WireGuard interface detected. Using fallback: $VPN_INTERFACE"
+    fi
 fi
 
 # Check initial VPN state and set firewall rules accordingly
@@ -100,15 +121,16 @@ while true; do
             if [ "$VPN_WAS_DISCONNECTED" = false ]; then
                 block_all_traffic
                 VPN_WAS_DISCONNECTED=true
+                echo "VPN interface $VPN_INTERFACE has incorrect MTU ($current_mtu)."
             fi
-            echo "VPN interface $VPN_INTERFACE has incorrect MTU ($current_mtu)."
         fi
     else
         # VPN interface doesn't exist
         if [ "$VPN_WAS_DISCONNECTED" = false ]; then
             block_all_traffic
             VPN_WAS_DISCONNECTED=true
+            echo "VPN interface $VPN_INTERFACE is down."
         fi
-        echo "VPN interface $VPN_INTERFACE is down."
     fi
+    sleep "$CHECK_INTERVAL"
 done
