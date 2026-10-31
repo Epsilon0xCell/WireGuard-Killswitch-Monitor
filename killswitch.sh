@@ -21,6 +21,33 @@ VPN_LISTEN_PORT="${WIREGUARD_PORT:-51820}"
 # loop notices, and in exchange the loop stops eating a core.
 CHECK_INTERVAL=2
 
+# Arguments are handled before anything touches pf. --help prints
+# this text and exits 0; anything else is a mistake and exits 2, so
+# a mistyped flag can never start the monitor by accident.
+usage() {
+    echo "Usage: ./killswitch.sh [--help]"
+    echo "Monitor the WireGuard interface and load pf rules that block all"
+    echo "traffic while it is down. Takes no arguments. Set VPN_INTERFACE"
+    echo "to name the interface and WIREGUARD_PORT to set the listen port"
+    echo "(default 51820). Stop with Ctrl+C."
+}
+if [ "$#" -gt 0 ]; then
+    if [ "$#" -eq 1 ] && { [ "$1" = "--help" ] || [ "$1" = "-h" ]; }; then
+        usage
+        exit 0
+    fi
+    echo "Error: unknown argument: $1" >&2
+    usage >&2
+    exit 2
+fi
+
+# The port reaches a netstat pattern during detection, so it gets the
+# same shape check as the interface name: digits only, in range.
+if ! [[ "$VPN_LISTEN_PORT" =~ ^[0-9]+$ ]] || [ "$VPN_LISTEN_PORT" -lt 1 ] || [ "$VPN_LISTEN_PORT" -gt 65535 ]; then
+    echo "Error: invalid WIREGUARD_PORT: $VPN_LISTEN_PORT" >&2
+    exit 2
+fi
+
 # Function to detect WireGuard interface based on MTU and listen port
 detect_wg_interface() {
     # Get all utun interfaces

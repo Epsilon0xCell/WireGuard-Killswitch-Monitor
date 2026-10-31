@@ -27,7 +27,7 @@ A bash script that creates a kill switch for WireGuard VPN on macOS using PF (Pa
 ```bash
 git clone https://github.com/Epsilon0xCell/WireGuard-Killswitch-Monitor.git
 
-cd wireguard-killswitch
+cd WireGuard-Killswitch-Monitor
 ```
 
 2. Make the script executable:
@@ -45,6 +45,8 @@ Simply run the script:
 ```bash
 ./killswitch.sh
 ```
+
+`./killswitch.sh --help` prints a short usage text and exits 0 without touching pf. The script takes no other arguments: an unknown argument exits 2, and so does a `WIREGUARD_PORT` that is not a number from 1 to 65535 or a `VPN_INTERFACE` value with characters outside letters, digits, `_`, `.`, and `-`.
 
 Stop it with Ctrl+C. The cleanup function then flushes the PF rules (`sudo pfctl -F all`) and disables PF (`sudo pfctl -d`), restoring normal internet access.
 
@@ -113,7 +115,7 @@ pip install -r requirements.txt
 python3 leak_test.py
 ```
 
-Stop it with Ctrl+C.
+Stop it with Ctrl+C. `python3 leak_test.py --help` prints usage and exits 0; any other argument exits 2.
 
 ## Automatic Startup Configuration
 
@@ -221,6 +223,14 @@ The `cleanup` function in `killswitch.sh` runs on SIGINT and SIGTERM and uses `s
 - The script requires root privileges to modify firewall rules
 - All traffic is blocked if the VPN connection drops or reports the wrong MTU
 - The loaded rules are deliberately simple: `block all` plus `pass in` and `pass out` on the VPN interface while it is up, `block all` alone otherwise, each state loaded in a single `pfctl -f` call. PF rules loaded this way replace the main PF ruleset while the script runs, and cleanup disables PF rather than restoring a previous ruleset.
+
+## Tests
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+18 tests, all passing when I last ran them on a Linux host. The killswitch tests run the real `killswitch.sh` against stub `pfctl`, `ifconfig`, `netstat`, `wg`, `sudo`, and `sleep` commands on PATH, so they check the control flow, the single ruleset load, the retry after a failed load, the argument and port checks, and the cleanup calls. They do not check real pf behavior on macOS, and I have not run this pass on a Mac. The `leak_test.py` tests mock the ipinfo.io request, the hostname lookup, and `osascript`. Confirming the loaded rules on a real Mac with `sudo pfctl -sr` in both the connected and blocked states is still an open check for me, not something these tests settle.
 
 ## Contributing
 

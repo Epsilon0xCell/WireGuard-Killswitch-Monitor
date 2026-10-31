@@ -1,5 +1,6 @@
 import ipaddress
 import subprocess
+import sys
 import time
 import socket
 
@@ -110,5 +111,19 @@ def main():
         print("\nStopping CONTINUOUS IP Monitor.")
 
 
+USAGE = (
+    "Usage: python3 leak_test.py [--help]\n"
+    "Poll ipinfo.io for the public IP and raise a macOS notification\n"
+    "when it matches the local address. Takes no arguments. Stop with Ctrl+C."
+)
+
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 2 and sys.argv[1] in ("--help", "-h"):
+        print(USAGE)
+    elif len(sys.argv) > 1:
+        print(f"Error: unknown argument: {sys.argv[1]}", file=sys.stderr)
+        print(USAGE, file=sys.stderr)
+        sys.exit(2)
+    else:
+        main()
