@@ -63,7 +63,7 @@ export WIREGUARD_PORT=51820
 ./killswitch.sh
 ```
 
-The script does not read any PF anchor file: rules are loaded directly with `pfctl -f -` from standard input, and the check interval is a `CHECK_INTERVAL` constant (2 seconds) at the top of the script.
+The script does not read any PF anchor file: each state change writes the complete ruleset to a temp file and loads it with a single `pfctl -f` call, because a pfctl load replaces the whole main ruleset and loading rules one at a time would discard all but the last. pfctl failures are printed and the state is retried on the next check rather than reported as success. The check interval is a `CHECK_INTERVAL` constant (2 seconds) at the top of the script.
 
 ### Finding WireGuard Interface
 
@@ -220,7 +220,7 @@ The `cleanup` function in `killswitch.sh` runs on SIGINT and SIGTERM and uses `s
 
 - The script requires root privileges to modify firewall rules
 - All traffic is blocked if the VPN connection drops or reports the wrong MTU
-- The loaded rules are deliberately simple: `pass in` and `pass out` on the VPN interface while it is up, `block all` otherwise. PF rules loaded this way replace the main PF ruleset while the script runs, and cleanup disables PF rather than restoring a previous ruleset.
+- The loaded rules are deliberately simple: `block all` plus `pass in` and `pass out` on the VPN interface while it is up, `block all` alone otherwise, each state loaded in a single `pfctl -f` call. PF rules loaded this way replace the main PF ruleset while the script runs, and cleanup disables PF rather than restoring a previous ruleset.
 
 ## Contributing
 
