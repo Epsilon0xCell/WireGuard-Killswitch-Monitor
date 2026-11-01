@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 60" role="img" aria-label="Rope divider with three sagging bays and a red flag">
+<polygon points="30,52 74,52 62,28 42,28" fill="#565c5e"/><polygon points="1126,52 1170,52 1158,28 1138,28" fill="#565c5e"/>
+<path d="M52 26 Q230 56 410 30 Q600 58 790 30 Q980 56 1148 26" fill="none" stroke="#6e7476" stroke-width="4"/>
+<line x1="600" y1="34" x2="600" y2="10" stroke="#3c3a34" stroke-width="3"/><path d="M600 10 l26 5 -26 8 z" fill="#c63422"/>
+</svg>

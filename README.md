@@ -1,10 +1,17 @@
-![banner](assets/banner.png)
+![Intro scenery](intro-banner.png)
+
 
 # WireGuard Kill Switch for macOS
+
+![Wordmark banner](banner.png)
+
+![Animated scene](scene.svg)
 
 A bash script that creates a kill switch for WireGuard VPN on macOS using PF (Packet Filter). While it runs, traffic is passed only when the WireGuard interface is present with the expected MTU; otherwise all traffic is blocked, so a dropped VPN does not leak traffic onto the local network. Make sure your VPN uses MTU 1280: the script treats any other MTU as "VPN not connected".
 
 ## Features
+
+> **Hut log:** the watch holds only while the interface reports MTU 1280. Any other MTU reads as not connected.
 
 - Blocks all traffic when the VPN interface is missing or has the wrong MTU
 - Allows traffic in and out on the WireGuard interface while it is up
@@ -14,11 +21,17 @@ A bash script that creates a kill switch for WireGuard VPN on macOS using PF (Pa
 - Automatic cleanup on Ctrl+C or SIGTERM: the cleanup function flushes the PF rules and disables PF (see Cleanup)
 - Status messages on state changes only, not on every check
 
+
+![Separator](sep-heavy.svg)
+
 ## Requirements
 
 - macOS operating system
 - WireGuard installed, configured with MTU 1280 and ListenPort 51820 (or set WIREGUARD_PORT to your port)
 - Administrative privileges (sudo): the script calls pfctl through sudo
+
+
+![Separator](sep-heavy.svg)
 
 ## Installation
 
@@ -36,7 +49,13 @@ cd WireGuard-Killswitch-Monitor
 chmod +x killswitch.sh
 ```
 
+
+![Separator](sep-heavy.svg)
+
 ## Usage
+
+
+![Separator](sep-light.svg)
 
 ### Basic Usage
 
@@ -49,6 +68,9 @@ Simply run the script:
 `./killswitch.sh --help` prints a short usage text and exits 0 without touching pf. The script takes no other arguments: an unknown argument exits 2, and so does a `WIREGUARD_PORT` that is not a number from 1 to 65535 or a `VPN_INTERFACE` value with characters outside letters, digits, `_`, `.`, and `-`.
 
 Stop it with Ctrl+C. The cleanup function then flushes the PF rules (`sudo pfctl -F all`) and disables PF (`sudo pfctl -d`), restoring normal internet access.
+
+
+![Separator](sep-light.svg)
 
 ### Configuration
 
@@ -66,6 +88,9 @@ export WIREGUARD_PORT=51820
 ```
 
 The script does not read any PF anchor file: each state change writes the complete ruleset to a temp file and loads it with a single `pfctl -f` call, because a pfctl load replaces the whole main ruleset and loading rules one at a time would discard all but the last. pfctl failures are printed and the state is retried on the next check rather than reported as success. The check interval is a `CHECK_INTERVAL` constant (2 seconds) at the top of the script.
+
+
+![Separator](sep-light.svg)
 
 ### Finding WireGuard Interface
 
@@ -106,6 +131,9 @@ Set ListenPort=51820 in wireguard settings (or export WIREGUARD_PORT with your p
 export VPN_INTERFACE="utun3"
 ```
 
+
+![Separator](sep-heavy.svg)
+
 ## leak_test.py
 
 A small companion monitor, also macOS only. It polls https://ipinfo.io/ip roughly every 0.1 seconds plus request time, prints the current public IP, and uses macOS notifications (`osascript`) to warn you. It treats the first public IP that differs from your local address as the "VPN active" state; if the public IP later equals your local address, it raises a "POTENTIAL VPN LEAK DETECTED" notification. That is a heuristic based only on comparing the two addresses, not proof of a leak. The service response is validated as an IP address before it is used anywhere.
@@ -116,6 +144,9 @@ python3 leak_test.py
 ```
 
 Stop it with Ctrl+C. `python3 leak_test.py --help` prints usage and exits 0; any other argument exits 2.
+
+
+![Separator](sep-heavy.svg)
 
 ## Automatic Startup Configuration
 
@@ -179,6 +210,9 @@ sudo launchctl load -w /Library/LaunchDaemons/com.wireguard.killswitch.plist
 sudo launchctl list | grep com.wireguard.killswitch
 ```
 
+
+![Separator](sep-light.svg)
+
 ### Managing Autostart
 
 - To stop the service and disable autostart:
@@ -189,7 +223,13 @@ launchctl unload /Library/LaunchDaemons/com.wireguard.killswitch.plist
 
 Note: with KeepAlive set, a stopped script is relaunched by launchd while the daemon is loaded, and the cleanup trap still runs on SIGTERM.
 
+
+![Separator](sep-heavy.svg)
+
 ## Troubleshooting
+
+
+![Separator](sep-light.svg)
 
 ### Logs
 
@@ -203,6 +243,11 @@ tail -f /var/log/killswitch.error.log
 # Cleanup
 
 The `cleanup` function in `killswitch.sh` runs on SIGINT and SIGTERM and uses `sudo pfctl -F all` and `sudo pfctl -d` to flush and disable the Packet Filter (PF) rules. If the script is killed with SIGKILL (`kill -9`), no cleanup can run and the last loaded rules stay in place; run those two pfctl commands by hand in that case.
+
+
+![Separator](sep-light.svg)
+
+> **Hut log:** a SIGKILL ending runs no cleanup. The last loaded rules stay in place until the two pfctl commands are run by hand.
 
 ### Common Issues
 
@@ -218,11 +263,17 @@ The `cleanup` function in `killswitch.sh` runs on SIGINT and SIGTERM and uses `s
 3. **Everything is blocked even though the VPN is connected**
    - Check the interface MTU: the script only treats MTU 1280 as connected. Set your WireGuard interface to MTU 1280, or the rules will stay in the blocked state.
 
+
+![Separator](sep-heavy.svg)
+
 ## Security Considerations
 
 - The script requires root privileges to modify firewall rules
 - All traffic is blocked if the VPN connection drops or reports the wrong MTU
 - The loaded rules are deliberately simple: `block all` plus `pass in` and `pass out` on the VPN interface while it is up, `block all` alone otherwise, each state loaded in a single `pfctl -f` call. PF rules loaded this way replace the main PF ruleset while the script runs, and cleanup disables PF rather than restoring a previous ruleset.
+
+
+![Separator](sep-heavy.svg)
 
 ## Tests
 
@@ -232,9 +283,17 @@ python3 -m unittest discover -s tests
 
 18 tests, all passing when I last ran them on a Linux host. The killswitch tests run the real `killswitch.sh` against stub `pfctl`, `ifconfig`, `netstat`, `wg`, `sudo`, and `sleep` commands on PATH, so they check the control flow, the single ruleset load, the retry after a failed load, the argument and port checks, and the cleanup calls. They do not check real pf behavior on macOS, and I have not run this pass on a Mac. The `leak_test.py` tests mock the ipinfo.io request, the hostname lookup, and `osascript`. Confirming the loaded rules on a real Mac with `sudo pfctl -sr` in both the connected and blocked states is still an open check for me, not something these tests settle.
 
+
+![Separator](sep-heavy.svg)
+
+> **Hut log:** the 18 tests passed on a Linux host with stub commands. Real PF behaviour on a Mac is still unchecked.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request
+
+
+![Separator](sep-heavy.svg)
 
 ## License
 

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-label="Sastrugi field with a rope line between cairns and a lit tent window">
+<rect width="1200" height="420" fill="#c4d0d8">
+<animate attributeName="fill" values="#c4d0d8;#aebac2;#c4d0d8" dur="36s" repeatCount="indefinite"/></rect>
+<g stroke="#ffffff" stroke-width="3" opacity="0.55">
+<line x1="-120" y1="330" x2="40" y2="322"><animate attributeName="x1" values="-120;1250" dur="7s" repeatCount="indefinite"/><animate attributeName="x2" values="40;1410" dur="7s" repeatCount="indefinite"/></line>
+<line x1="-200" y1="352" x2="-60" y2="345"><animate attributeName="x1" values="-200;1250" dur="11s" begin="3s" repeatCount="indefinite"/><animate attributeName="x2" values="-60;1390" dur="11s" begin="3s" repeatCount="indefinite"/></line>
+</g>
+<path d="M0 300 Q300 282 600 296 T1200 290 V420 H0 Z" fill="#dde2dc"/>
+<path d="M0 336 Q300 318 600 332 T1200 326 V420 H0 Z" fill="#ccd6da"/>
+<g><polygon points="150,268 196,268 184,238 162,238" fill="#565c5e"/><polygon points="158,240 188,240 178,216 168,216" fill="#6e7476"/>
+<polygon points="1010,262 1052,262 1042,236 1020,236" fill="#565c5e"/><polygon points="1017,238 1045,238 1036,218 1026,218" fill="#6e7476"/></g>
+<path d="M173 232 Q420 268 600 240 Q800 214 1031 232" fill="none" stroke="#3c3a34" stroke-width="4"/>
+<g fill="#c63422">
+<path d="M420 246 l34 6 -34 10 z"><animateTransform attributeName="transform" type="rotate" values="0 420 246;-16 420 246;0 420 246" dur="7s" repeatCount="indefinite"/></path>
+<path d="M790 226 l34 6 -34 10 z"><animateTransform attributeName="transform" type="rotate" values="0 790 226;-16 790 226;0 790 226" dur="11s" begin="3s" repeatCount="indefinite"/></path>
+</g>
+<g><polygon points="1064,268 1130,208 1196,268" fill="#463f33"/><rect x="1114" y="232" width="32" height="24" rx="4" fill="#ffc46e"/><path d="M1122 240 l12 8 M1134 240 l-12 8 M1130 236 v14" stroke="#fff0d2" stroke-width="2"/></g>
+<path d="M0 356 Q300 336 600 352 T1200 346" fill="none" stroke="#ffffff" stroke-width="6"/>
+<path d="M0 372 Q300 354 600 368 T1200 362" fill="none" stroke="#98a6b0" stroke-width="4"/>
+<path d="M0 392 Q300 376 600 390 T1200 384" fill="none" stroke="#aebbc4" stroke-width="4"/>
+<g stroke="#ffffff" stroke-width="2">
+<line x1="180" y1="350" x2="196" y2="346"><animate attributeName="opacity" values="1;0.1;1" dur="3s" repeatCount="indefinite"/></line>
+<line x1="520" y1="344" x2="536" y2="340"><animate attributeName="opacity" values="0.1;1;0.1" dur="4s" repeatCount="indefinite"/></line>
+<line x1="880" y1="340" x2="896" y2="336"><animate attributeName="opacity" values="1;0.1;1" dur="5s" repeatCount="indefinite"/></line>
+</g>
+</svg>
