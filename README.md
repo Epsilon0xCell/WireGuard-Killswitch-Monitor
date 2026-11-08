@@ -1,9 +1,11 @@
-![Intro scenery](intro-banner.png)
+![Intro scenery: a lowered red and white striped barrier gate close across a wet country level crossing, its red signal lamps lit and reflected in the wet asphalt, the empty road waiting behind it](intro-banner.png)
 
 
 # WireGuard Kill Switch for macOS
 
-![Wordmark banner](banner.png)
+![Wordmark banner: a country level crossing with the red and white striped barrier fully down across the asphalt road, both red signal lamps lit on the post at the right and the road empty in both directions under a pale sky](banner.png)
+
+<p align="center"><img src="logo.png" alt="WireGuard-Killswitch-Monitor logo: a level crossing barrier post with one red signal lamp lit above it and its long arm, banded in red and white blocks, lowered flat across an empty road" width="200"></p>
 
 ![Animated scene](scene.svg)
 
