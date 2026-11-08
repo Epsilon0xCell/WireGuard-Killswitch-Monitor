@@ -3,57 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WireGuard-Killswitch-Monitor: Route Board at the Hut</title>
-<meta name="description" content="killswitch.sh is a bash script for macOS that uses PF to pass traffic only while a WireGuard interface is present and reporting MTU 1280, rechecking every 2 seconds.">
+<title>WireGuard-Killswitch-Monitor: The Barrier Watch</title>
+<meta name="description" content="A bash kill switch for WireGuard on macOS using PF: traffic passes only while the WireGuard interface reports MTU 1280, re-checked every 2 seconds, and everything is blocked the moment it drops.">
 <style>
-@font-face{font-family:'Arsenal SC';src:url('fonts/ArsenalSC.ttf') format('truetype');}
-@font-face{font-family:'Archivo';src:url('fonts/Archivo.ttf') format('truetype');}
-:root{--pine:#101614;--cream:#f3eedc;--flint:#6e7476;--ember:#c63422}
-*{box-sizing:border-box} body{margin:0;background:var(--pine);color:var(--cream);font-family:'Archivo',sans-serif;line-height:1.65}
-h1,h2{font-family:'Arsenal SC',serif;letter-spacing:.04em}
-.hero{padding:2rem 6vw 1rem;max-width:1080px;margin:0 auto}.hero img.banner{width:100%;height:auto}
-.logo{width:92px;height:92px}
-main{padding:0 6vw 3rem;max-width:1080px;margin:0 auto}
-.panel{background:var(--cream);color:var(--pine);padding:1.2rem 1.5rem 1.2rem 3.4rem;margin:1.4rem 0;position:relative;border-radius:4px;background-image:repeating-linear-gradient(transparent,transparent 27px,rgba(16,22,20,.07) 28px)}
-.cairn{position:absolute;left:14px;top:18px;width:22px}
-.cairn i{display:block;margin:2px auto;background:var(--flint);height:6px}
-.cairn i:nth-child(1){width:10px}.cairn i:nth-child(2){width:16px}.cairn i:nth-child(3){width:22px}
-.state{font-family:'Arsenal SC',serif;color:var(--flint);font-size:.85rem;letter-spacing:.08em}
-.flag{color:var(--ember);font-weight:bold}
-.btn{display:inline-block;background:var(--cream);color:var(--pine);font-family:'Arsenal SC',serif;text-decoration:none;padding:.55rem 1.1rem;margin:.3rem .3rem .3rem 0;border-top:5px solid #fffdf2;box-shadow:0 3px 0 var(--flint)}
-.btn:hover{background:#fffdf2}.btn:active{transform:translateY(2px);box-shadow:inset 0 0 0 2px var(--ember)}
-.btn:focus-visible{outline:3px double var(--flint);outline-offset:3px}
-a{color:#8fb7d9;text-underline-offset:3px}
-.panel a{color:#20507e}
-a .cm{display:inline-block;margin-right:.35em;color:var(--flint);font-size:.7em;vertical-align:middle}
-a:hover .cm{color:var(--ember)}
-.rope{margin:1.8rem auto;height:18px;border-top:3px solid var(--flint);border-radius:50%;width:100%}
-.rope.short{width:34%}
-pre{background:#fffdf2;padding:1rem;overflow-x:auto;border-left:4px solid var(--flint);color:var(--pine)}
-.hutnote{border-top:2px solid var(--flint);border-left:3px solid var(--flint);padding:.7rem 1rem;background:#efe8d2}
-.warn{color:var(--ember)}
-footer{padding:2rem 6vw;color:var(--cream)}
+@font-face{font-family:'Dela Gothic One';src:url('fonts/DelaGothicOne-400.woff2') format('woff2');font-weight:400}
+@font-face{font-family:'Schibsted Grotesk';src:url('fonts/SchibstedGrotesk-400.woff2') format('woff2');font-weight:400}
+@font-face{font-family:'Schibsted Grotesk';src:url('fonts/SchibstedGrotesk-500.woff2') format('woff2');font-weight:500}
+@font-face{font-family:'Schibsted Grotesk';src:url('fonts/SchibstedGrotesk-600.woff2') format('woff2');font-weight:600}
+@font-face{font-family:'Schibsted Grotesk';src:url('fonts/SchibstedGrotesk-700.woff2') format('woff2');font-weight:700}
+:root{--asphalt:#22252a;--asphaltdk:#14161a;--post:#8d949c;--paper:#f7f7f4;--white:#ffffff;--red:#c1271e;--reddk:#8f1a13;--line:#cfd2cd;--ink:#26282c}
+*{box-sizing:border-box} body{margin:0;background:var(--asphalt);color:var(--ink);font-family:'Schibsted Grotesk',sans-serif;line-height:1.65}
+h1,h2{font-family:'Dela Gothic One',sans-serif;font-weight:400}
+.hero{background:linear-gradient(170deg,#3a3e45 0%,var(--asphalt) 60%,var(--asphaltdk) 100%);padding:2.2rem 6vw 1.8rem;border-bottom:8px solid var(--red)}
+.hero .inner{max-width:1020px;margin:0 auto}
+.hero img.wide{width:100%;height:auto;display:block;border:5px solid var(--white);border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.5)}
+.hero .row{display:flex;gap:1.1rem;align-items:flex-start;margin-top:1.2rem}
+.hero .row img{width:92px;height:92px;object-fit:cover;border-radius:6px;border:3px solid var(--white);background:var(--white)}
+.hero h1{margin:.1rem 0 .3rem;font-size:2.3rem;color:#fbfbf7}
+.hero p{max-width:44rem;color:#d8dade}
+.hero a{color:#f0b3ad}
+main{padding:0 6vw 3rem;max-width:1020px;margin:0 auto}
+.card{background:var(--paper);border:1px solid var(--line);border-top:8px solid var(--white);outline:1px solid #b9bcb6;padding:1.2rem 1.5rem;margin:1.6rem 0;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.card.red{border-top-color:var(--red)}
+.card h2{margin:.1rem 0 .5rem;font-size:1.55rem;color:var(--asphaltdk)}
+.card p{margin:.4rem 0}
+.strip{background:var(--asphaltdk);color:#eef0ea;padding:1rem 1.2rem;overflow-x:auto;font-family:ui-monospace,Menlo,monospace;border-radius:4px;border-left:6px solid var(--red)}
+.btn{display:inline-block;background:var(--red);color:#fff;font-family:'Schibsted Grotesk',sans-serif;font-weight:700;text-decoration:none;padding:.55rem 1.1rem;border-radius:3px;margin:.3rem .4rem .3rem 0}
+.btn:hover{background:var(--white);color:var(--reddk)}.btn:active{transform:translateY(2px)}
+.btn:focus-visible{outline:2px dashed var(--red);outline-offset:3px}
+a{color:var(--reddk);font-weight:700}
+table{border-collapse:collapse}td{padding:.2rem .9rem .2rem 0;vertical-align:top}
+td:first-child{font-weight:700;color:var(--asphaltdk);white-space:nowrap}
+ul{margin:.4rem 0;padding-left:1.2rem}li{margin:.25rem 0}
+.small{font-size:.92rem}
+footer{padding:0 6vw 2.5rem;max-width:1020px;margin:0 auto;color:#9aa0a6}
 </style>
 </head>
 <body>
 <header class="hero">
-<img class="logo" src="assets/logo.png" alt="Wind carved snow ridge with one red survey flag">
-<img class="banner" src="assets/banner.png" alt="Polar plateau with a rope line between cairns and a route board carrying the project name">
-<h1>WireGuard-Killswitch-Monitor</h1>
-<p><code>killswitch.sh</code> is a bash script for macOS that uses PF, the packet filter, to keep traffic moving only while a WireGuard interface is present and reporting MTU 1280. It rechecks every 2 seconds and prints a message only when the state changes.</p>
-<p><a class="btn" href="https://github.com/Epsilon0xCell/WireGuard-Killswitch-Monitor">Open the repo</a> <a class="btn" href="#exit">Exit and limits</a></p>
+<div class="inner">
+<img class="wide" src="assets/intro-banner.png" alt="A lowered red and white striped level crossing barrier gate close across a wet country road, its red signal lamps lit and reflected in a puddle on the asphalt, the road empty behind it">
+<div class="row"><img src="assets/logo.png" alt="WireGuard-Killswitch-Monitor logo: a level crossing barrier post with its red signal lamp lit and its long arm, banded in red and white blocks, lowered flat across an empty road"><div><h1>WireGuard Kill Switch for macOS</h1><p>A bash script that creates a kill switch for WireGuard VPN on macOS using PF (Packet Filter). While it runs, traffic is passed only when the WireGuard interface is present with the expected MTU; otherwise all traffic is blocked, so a dropped VPN does not leak traffic onto the local network.</p><p><a class="btn" href="https://github.com/Epsilon0xCell/WireGuard-Killswitch-Monitor">Open the repo</a> <a class="btn" href="#usage">Usage</a></p></div></div>
+</div>
 </header>
 <main>
-<div class="rope"></div>
-<section class="panel"><span class="cairn"><i></i><i></i><i></i></span><p class="state">Panel one: the job</p><h2>One ruleset per state</h2><p>While the MTU 1280 condition holds, the script loads one ruleset: <code>block all</code> plus <code>pass in</code> and <code>pass out</code> on the VPN interface. When the condition fails, it loads <code>block all</code> on its own. The recheck interval is a fixed <code>CHECK_INTERVAL</code> constant of 2 seconds in the script.</p></section>
-<section class="panel"><span class="cairn"><i></i><i></i><i></i></span><p class="state">Panel two: detection</p><h2>How the interface is found</h2><p>With <code>VPN_INTERFACE</code> unset, the script looks among utun interfaces for MTU 1280, checks that something on the machine listens on the WireGuard UDP port in netstat output, and checks that the interface holds an IP address. Failing that, it tries <code>wg show interfaces</code>, and failing that it falls back to utun4. With <code>VPN_INTERFACE</code> set, detection is skipped and that named interface is watched directly.</p><div class="hutnote"><p>Hut note: the script's own comments admit the weak point. The netstat port test is not tied to the candidate interface, so MTU and address do the narrowing, and none of it proves the listening port belongs to that interface.</p></div></section>
-<div class="rope short"></div>
-<section class="panel"><span class="cairn"><i></i><i></i><i></i></span><p class="state">Panel three: running</p><h2>Requirements and configuration</h2><p>Requirements are macOS, WireGuard set to MTU 1280 and ListenPort 51820, and sudo, since pfctl is called through sudo. Usage is <code>./killswitch.sh</code> after <code>chmod +x</code>. <code>--help</code> or <code>-h</code> prints usage and exits 0; any other argument exits 2. <code>WIREGUARD_PORT</code> is accepted only as a number from 1 to 65535, default 51820.</p><pre>chmod +x killswitch.sh
-./killswitch.sh</pre><p>Each state change writes a complete ruleset to a temp file and loads it with a single <code>pfctl -f</code> call: a load replaces the whole main ruleset, so loading rule by rule would discard all but the last. Failed loads are reported and retried on the next check, never announced as success.</p></section>
-<section class="panel" id="exit"><span class="cairn"><i></i><i></i><i></i></span><p class="state">Panel four: exit <span class="flag">&#9873;</span></p><h2>Cleanup flushes and disables PF</h2><p>Ctrl+C or SIGTERM runs cleanup, which flushes the rules with <code>sudo pfctl -F all</code> and disables PF with <code>sudo pfctl -d</code>, restoring normal access rather than restoring any earlier ruleset.</p><p class="warn">If the script is ended with SIGKILL, no cleanup can run and the last rules stay loaded until the two pfctl commands are run by hand or the machine restarts.</p><p>The launchd plist lives at <code>/Library/LaunchDaemons/com.wireguard.killswitch.plist</code>, with RunAtLoad and KeepAlive, and logs at <code>/var/log/killswitch.log</code> and <code>/var/log/killswitch.error.log</code>. KeepAlive relaunches a stopped script while the daemon stays loaded.</p></section>
-<section class="panel"><span class="cairn"><i></i><i></i><i></i></span><p class="state">Panel five: the companion</p><h2>leak_test.py, a heuristic</h2><p class="warn">Labelled a heuristic: a matching address is treated as a possible leak, not as proof of one.</p><p><code>leak_test.py</code>, also macOS only, polls <a href="https://ipinfo.io/ip"><span class="cm">&#9650;&#9650;&#9650;</span>https://ipinfo.io/ip</a> roughly every tenth of a second plus request time, compares the public address with the local one, validates the reply as an IP address, and raises a macOS notification through osascript when the public address later matches the local one. Its install line is <code>pip install -r requirements.txt</code>, its only listed requirement being requests.</p></section>
-<section class="panel"><span class="cairn"><i></i><i></i><i></i></span><p class="state">Panel six: test record</p><h2>18 tests, Linux host</h2><p>18 tests run against stub pfctl, ifconfig, netstat, wg, sudo, and sleep commands, plus mocked requests for the leak test, all passing on a Linux host when last run. Real PF behaviour on a Mac is still unchecked, and <code>sudo pfctl -sr</code> in both states is named as an open check.</p></section>
+<section class="card red"><h2>The one rule</h2><p>Make sure your VPN uses MTU 1280: the script treats any other MTU as "VPN not connected". The loaded rules are deliberately simple: <code>block all</code> plus <code>pass in</code> and <code>pass out</code> on the VPN interface while it is up, <code>block all</code> alone otherwise. Each state change writes the complete ruleset to a temp file and loads it with a single <code>pfctl -f</code> call, because a pfctl load replaces the whole main ruleset. pfctl failures are printed and the state is retried on the next check rather than reported as success.</p></section>
+<section class="card"><h2>How it watches</h2><table>
+<tr><td>Detection</td><td>automatic: the interface with MTU 1280, the WireGuard UDP listen port visible in netstat, and an assigned IP, with a <code>wg show interfaces</code> fallback and a utun4 final fallback</td></tr>
+<tr><td>Re-check</td><td>every 2 seconds (a <code>CHECK_INTERVAL</code> constant at the top of the script); status messages print on state changes only, not on every check</td></tr>
+<tr><td>Requirements</td><td>macOS, WireGuard configured with MTU 1280 and ListenPort 51820 (or set <code>WIREGUARD_PORT</code>), and administrative privileges: the script calls pfctl through sudo</td></tr>
+</table></section>
+<section class="card" id="usage"><h2>Usage</h2><div class="strip">git clone https://github.com/Epsilon0xCell/WireGuard-Killswitch-Monitor.git<br>cd WireGuard-Killswitch-Monitor<br>chmod +x killswitch.sh<br>./killswitch.sh</div><p><code>./killswitch.sh --help</code> prints a short usage text and exits 0 without touching pf. The script takes no other arguments: an unknown argument exits 2, and so does a <code>WIREGUARD_PORT</code> that is not a number from 1 to 65535 or a <code>VPN_INTERFACE</code> value with characters outside letters, digits, <code>_</code>, <code>.</code>, and <code>-</code>.</p><table>
+<tr><td><code>VPN_INTERFACE</code></td><td>WireGuard interface name. When set, detection is skipped and this interface is monitored directly. When unset, the script auto-detects and falls back to utun4.</td></tr>
+<tr><td><code>WIREGUARD_PORT</code></td><td>WireGuard server listen port used during detection (default: 51820).</td></tr>
+</table><p>The README also walks through automatic startup under launchd, with the daemon file at <code>/Library/LaunchDaemons/com.wireguard.killswitch.plist</code>.</p></section>
+<section class="card red"><h2>Cleanup, and the SIGKILL gap</h2><p>Stop it with Ctrl+C. The cleanup function runs on SIGINT and SIGTERM and uses <code>sudo pfctl -F all</code> and <code>sudo pfctl -d</code> to flush the PF rules and disable PF, restoring normal internet access. Cleanup disables PF rather than restoring a previous ruleset. If the script is killed with SIGKILL (<code>kill -9</code>), no cleanup can run and the last loaded rules stay in place; run those two pfctl commands by hand in that case.</p></section>
+<section class="card"><h2>leak_test.py</h2><p>A small companion monitor, also macOS only. It polls https://ipinfo.io/ip roughly every 0.1 seconds plus request time, prints the current public IP, and uses macOS notifications (<code>osascript</code>) to warn you. It treats the first public IP that differs from your local address as the "VPN active" state; if the public IP later equals your local address, it raises a "POTENTIAL VPN LEAK DETECTED" notification. That is a heuristic based only on comparing the two addresses, not proof of a leak. The service response is validated as an IP address before it is used anywhere. <code>python3 leak_test.py --help</code> prints usage and exits 0; any other argument exits 2.</p></section>
+<section class="card"><h2>The tests</h2><div class="strip">python3 -m unittest discover -s tests</div><p>18 tests, all passing when last run on a Linux host. The killswitch tests run the real <code>killswitch.sh</code> against stub <code>pfctl</code>, <code>ifconfig</code>, <code>netstat</code>, <code>wg</code>, <code>sudo</code>, and <code>sleep</code> commands on PATH, so they check the control flow, the single ruleset load, the retry after a failed load, the argument and port checks, and the cleanup calls. They do not check real PF behavior on macOS, and the pass has not been run on a Mac: confirming the loaded rules on a real Mac with <code>sudo pfctl -sr</code> in both the connected and blocked states is still an open check, not something these tests settle. The <code>leak_test.py</code> tests mock the ipinfo.io request, the hostname lookup, and <code>osascript</code>.</p></section>
+<section class="card"><h2>The files</h2><p class="small"><code>killswitch.sh</code>, the kill switch itself. <code>leak_test.py</code>, the companion monitor. <code>tests</code>, the 18 tests. <code>LICENSE</code>, the MIT License. Full usage, autostart, and troubleshooting notes are in the <a href="https://github.com/Epsilon0xCell/WireGuard-Killswitch-Monitor">repo README</a>.</p></section>
 </main>
-<footer><p>WireGuard-Killswitch-Monitor: a watch kept in bad weather, one complete ruleset per state, and a clean stand down on exit.</p></footer>
+<footer><p>The barrier is down and the lamps are lit: an empty road is the correct state while the line is unsafe.</p></footer>
 </body>
 </html>
