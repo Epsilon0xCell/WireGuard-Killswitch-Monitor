@@ -56,9 +56,6 @@ chmod +x killswitch.sh
 
 ## Usage
 
-
-![Separator](sep-light.svg)
-
 ### Basic Usage
 
 Simply run the script:
@@ -230,9 +227,6 @@ Note: with KeepAlive set, a stopped script is relaunched by launchd while the da
 
 ## Troubleshooting
 
-
-![Separator](sep-light.svg)
-
 ### Logs
 
 Check the log files for any issues (only when running under launchd):
@@ -242,14 +236,14 @@ tail -f /var/log/killswitch.log
 tail -f /var/log/killswitch.error.log
 ```
 
-# Cleanup
+### Cleanup
 
 The `cleanup` function in `killswitch.sh` runs on SIGINT and SIGTERM and uses `sudo pfctl -F all` and `sudo pfctl -d` to flush and disable the Packet Filter (PF) rules. If the script is killed with SIGKILL (`kill -9`), no cleanup can run and the last loaded rules stay in place; run those two pfctl commands by hand in that case.
 
+> **Hut log:** a SIGKILL ending runs no cleanup. The last loaded rules stay in place until the two pfctl commands are run by hand.
+
 
 ![Separator](sep-light.svg)
-
-> **Hut log:** a SIGKILL ending runs no cleanup. The last loaded rules stay in place until the two pfctl commands are run by hand.
 
 ### Common Issues
 
@@ -285,10 +279,10 @@ python3 -m unittest discover -s tests
 
 18 tests, all passing when I last ran them on a Linux host. The killswitch tests run the real `killswitch.sh` against stub `pfctl`, `ifconfig`, `netstat`, `wg`, `sudo`, and `sleep` commands on PATH, so they check the control flow, the single ruleset load, the retry after a failed load, the argument and port checks, and the cleanup calls. They do not check real pf behavior on macOS, and I have not run this pass on a Mac. The `leak_test.py` tests mock the ipinfo.io request, the hostname lookup, and `osascript`. Confirming the loaded rules on a real Mac with `sudo pfctl -sr` in both the connected and blocked states is still an open check for me, not something these tests settle.
 
+> **Hut log:** the 18 tests passed on a Linux host with stub commands. Real PF behaviour on a Mac is still unchecked.
+
 
 ![Separator](sep-heavy.svg)
-
-> **Hut log:** the 18 tests passed on a Linux host with stub commands. Real PF behaviour on a Mac is still unchecked.
 
 ## Contributing
 
